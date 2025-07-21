@@ -533,7 +533,7 @@ class CodebaseAnalyzer:
 
         def process_file(file_path):
             try:
-                content = self._read_file_fast(file_path)
+                content = self._read_file(file_path)
                 if content and content.strip():
                     relative_path = file_path.relative_to(project_path)
                     return str(relative_path), content
@@ -552,7 +552,7 @@ class CodebaseAnalyzer:
 
         return code_files, sample_files
 
-    def _read_file_fast(self, file_path: Path) -> str:
+    def _read_file(self, file_path: Path) -> str:
         try:
             file_size = file_path.stat().st_size
 
@@ -565,7 +565,7 @@ class CodebaseAnalyzer:
         except:
             return ""
 
-    def analyze_file_structure_fast(self, file_path: str, content: str) -> FileInfo:
+    def analyze_file_structure(self, file_path: str, content: str) -> FileInfo:
         language = self.get_file_language(Path(file_path))
 
         lines_of_code = len([line for line in content.splitlines()
@@ -596,7 +596,7 @@ class CodebaseAnalyzer:
             analysis = self.sql_analyzer.analyze_file(file_path, content)
             complexity = len(analysis.get('tables', []))
 
-        purpose = self.analyze_file_purpose_fast(file_path, language)
+        purpose = self.analyze_file_purpose(file_path, language)
 
         return FileInfo(
             path=file_path,
@@ -610,11 +610,11 @@ class CodebaseAnalyzer:
             functions_count=len(methods),
             classes_count=len(classes),
             token_count=token_count,
-            architectural_role=self.determine_architectural_role_fast(file_path),
+            architectural_role=self.determine_architectural_role(file_path),
             technical_summary=f"{language} file with {lines_of_code} lines"
         )
 
-    def determine_architectural_role_fast(self, file_path: str) -> str:
+    def determine_architectural_role(self, file_path: str) -> str:
         file_path_lower = file_path.lower()
 
         if any(x in file_path_lower for x in ['controller', 'handler', 'route']):
@@ -636,7 +636,7 @@ class CodebaseAnalyzer:
         else:
             return "Core Component"
 
-    def analyze_file_purpose_fast(self, file_path: str, language: str) -> str:
+    def analyze_file_purpose(self, file_path: str, language: str) -> str:
         file_name = Path(file_path).name.lower()
 
         if 'main' in file_name or 'app' in file_name or 'index' in file_name:
@@ -699,7 +699,7 @@ class CodebaseAnalyzer:
 
         def analyze_file_wrapper(item):
             file_path, content = item
-            file_info = self.analyze_file_structure_fast(file_path, content)
+            file_info = self.analyze_file_structure(file_path, content)
             return file_info
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -716,7 +716,7 @@ class CodebaseAnalyzer:
 
         overview_data = self.llm.analyze_project_overview(project_structure, sample_files)
         database_info = self.analyze_database_schema(code_files)
-        quality_metrics = self.calculate_quality_metrics_fast(file_analyses)
+        quality_metrics = self.calculate_quality_metrics(file_analyses)
 
         all_methods = []
         all_classes = []
@@ -727,8 +727,8 @@ class CodebaseAnalyzer:
         all_methods.sort(key=lambda x: x.complexity_score, reverse=True)
         all_classes.sort(key=lambda x: len(x.methods), reverse=True)
 
-        dependencies = self.extract_dependencies_fast(file_analyses)
-        recommendations = self.generate_recommendations_fast(quality_metrics, database_info)
+        dependencies = self.extract_dependencies(file_analyses)
+        recommendations = self.generate_recommendations(quality_metrics, database_info)
 
         token_stats = {
             'total_tokens': total_tokens,
@@ -769,7 +769,7 @@ class CodebaseAnalyzer:
 
         return analysis
 
-    def calculate_quality_metrics_fast(self, file_analyses: List[FileInfo]) -> Dict[str, Any]:
+    def calculate_quality_metrics(self, file_analyses: List[FileInfo]) -> Dict[str, Any]:
         if not file_analyses:
             return {}
 
@@ -789,7 +789,7 @@ class CodebaseAnalyzer:
             'maintainability_score': max(100 - (len(large_files) * 10) - (len(complex_files) * 15), 0)
         }
 
-    def extract_dependencies_fast(self, file_analyses: List[FileInfo]) -> List[str]:
+    def extract_dependencies(self, file_analyses: List[FileInfo]) -> List[str]:
         all_imports = set()
 
         for file_info in file_analyses:
@@ -804,7 +804,7 @@ class CodebaseAnalyzer:
 
         return sorted(external_deps)[:20]
 
-    def generate_recommendations_fast(self, quality_metrics: Dict[str, Any],
+    def generate_recommendations(self, quality_metrics: Dict[str, Any],
                                       database_info: Optional[DatabaseInfo]) -> List[str]:
         recommendations = []
 

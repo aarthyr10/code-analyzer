@@ -124,7 +124,8 @@ graph TD
 
 ```python
 # Component Setup
-
+from concurrent.futures import ThreadPoolExecutor
+from codebase_analyzer import CodebaseAnalyzer
 analyzer = CodebaseAnalyzer()
 ├── LLMClient (Ollama API)
 ├── Language Analyzers (Python, JS, SQL)
