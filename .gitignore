@@ -186,3 +186,4 @@ cython_debug/
 
 .log
 .DS_Store
+vector_store/chroma.sqlite3

@@ -1722,7 +1722,8 @@ class LLMAnalysisEngine:
                 "coupling_analysis": "description",
                 "cohesion_analysis": "description", 
                 "suggestions": ["suggestion1", "suggestion2"],
-                "language_specific_recommendations": ["rec1", "rec2"]
+                "language_specific_recommendations": ["rec1", "rec2"],
+                "feature_analysis": {'feature_1": "description", "feature_2": "description"},
             }}
             """
         )
